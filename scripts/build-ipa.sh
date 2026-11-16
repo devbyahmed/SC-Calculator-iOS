@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds an UNSIGNED Numo.ipa for sideloading with a free Apple ID
+# Builds an UNSIGNED SCCalculator.ipa for sideloading with a free Apple ID
 # (SideStore / AltStore re-sign it with your account when installing).
 # Run on your Mac from the project root:  sh scripts/build-ipa.sh
 set -e
@@ -13,10 +13,10 @@ fi
 
 xcodegen
 
-rm -rf build/ipa build/Numo.ipa
+rm -rf build/ipa build/SCCalculator.ipa
 xcodebuild \
-  -project Numo.xcodeproj \
-  -scheme Numo \
+  -project SCCalculator.xcodeproj \
+  -scheme SCCalculator \
   -configuration Release \
   -sdk iphoneos \
   -derivedDataPath build/derived \
@@ -26,8 +26,8 @@ xcodebuild \
   build
 
 mkdir -p build/ipa/Payload
-cp -R build/derived/Build/Products/Release-iphoneos/Numo.app build/ipa/Payload/
-(cd build/ipa && zip -qry ../Numo.ipa Payload)
+cp -R build/derived/Build/Products/Release-iphoneos/SCCalculator.app build/ipa/Payload/
+(cd build/ipa && zip -qry ../SCCalculator.ipa Payload)
 
 echo ""
-echo "Done: build/Numo.ipa"
+echo "Done: build/SCCalculator.ipa"

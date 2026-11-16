@@ -241,7 +241,7 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const ICON = k => `../Numo/Assets.xcassets/Preview-${k}.imageset/icon.png`;
+const ICON = k => `../SCCalculator/Assets.xcassets/Preview-${k}.imageset/icon.png`;
 let currentIcon = "Calculator";
 const TINTS = ["var(--indigo)","var(--blue)","var(--teal)","var(--green)","var(--orange)","var(--yellow)","var(--pink)","var(--red)","var(--purple)","var(--gray)"];
 const vaults = {
@@ -269,12 +269,12 @@ const FAKE = [["Photos","photo","#fff","#ff375f"],["Mail","mail","#0a84ff","#fff
   ["Podcasts","microphone-2","#bf5af2","#fff"],["Books","book","#ff9f0a","#fff"],["Files","folder","#0a84ff","#fff"]];
 function renderHome() {
   const a = FAKE.map(([n,i,bg,fg]) => `<div class="app"><div class="ic" style="background:${bg};color:${fg}"><i class="ti ti-${i}"></i></div>${n}</div>`);
-  a.splice(5, 0, `<button class="app" onclick="openNumo()"><div class="ic"><img src="${ICON(currentIcon)}" alt=""></div>SC Calculator</button>`);
+  a.splice(5, 0, `<button class="app" onclick="openApp()"><div class="ic"><img src="${ICON(currentIcon)}" alt=""></div>SC Calculator</button>`);
   $("apps").innerHTML = a.join("");
   $("dock").innerHTML = [["phone","#30d158"],["compass","#0a84ff"],["message","#30d158"],["music","#ff375f"]].map(([i,c]) => `<div class="app"><div class="ic" style="background:${c}"><i class="ti ti-${i}"></i></div></div>`).join("");
 }
 let setupDone = false;
-function openNumo() { show(setupDone ? "calc" : "setup"); }
+function openApp() { show(setupDone ? "calc" : "setup"); }
 
 /* Onboarding */
 const PAGES = [

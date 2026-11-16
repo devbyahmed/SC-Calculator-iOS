@@ -1,6 +1,6 @@
 # Draws the four disguise icons (1024x1024, no transparency) into the asset catalog.
 # Run on Windows:  powershell -ExecutionPolicy Bypass -File scripts\make-icons.ps1
-param([string]$Assets = (Join-Path $PSScriptRoot "..\Numo\Assets.xcassets"))
+param([string]$Assets = (Join-Path $PSScriptRoot "..\SCCalculator\Assets.xcassets"))
 
 Add-Type -AssemblyName System.Drawing
 $S = 1024

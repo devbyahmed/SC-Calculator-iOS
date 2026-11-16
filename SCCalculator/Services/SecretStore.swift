@@ -11,8 +11,8 @@ enum Profile: String, Codable {
 final class SecretStore {
     static let shared = SecretStore()
 
-    private let service = "numo.secrets"
-    private let installFlag = "numo.installed"
+    private let service = "sccalculator.secrets"
+    private let installFlag = "sccalculator.installed"
 
     private init() {}
 

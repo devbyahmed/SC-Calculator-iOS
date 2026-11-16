@@ -1,6 +1,6 @@
 # XcodeGen spec. On your Mac run:  brew install xcodegen && xcodegen
-# This generates Numo.xcodeproj (it is not committed; regenerate any time).
-name: Numo
+# This generates SCCalculator.xcodeproj (it is not committed; regenerate any time).
+name: SCCalculator
 
 options:
   bundleIdPrefix: com.example
@@ -15,13 +15,13 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
 
 targets:
-  Numo:
+  SCCalculator:
     type: application
     platform: iOS
     sources:
-      - path: Numo
+      - path: SCCalculator
     info:
-      path: Numo/Info.plist
+      path: SCCalculator/Info.plist
       properties:
         CFBundleDisplayName: SC Calculator
         CFBundleShortVersionString: $(MARKETING_VERSION)
@@ -36,8 +36,8 @@ targets:
         ITSAppUsesNonExemptEncryption: false
     settings:
       base:
-        # CHANGE THIS to something unique to you, e.g. com.yourname.numo
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.numo
+        # CHANGE THIS to something unique to you, e.g. com.yourname.sccalculator
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.sccalculator
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         # Leave empty here; pick your (free) Personal Team in Xcode > Signing & Capabilities.

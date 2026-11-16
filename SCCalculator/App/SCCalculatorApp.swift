@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct NumoApp: App {
+struct SCCalculatorApp: App {
     @State private var model = AppModel()
 
     var body: some Scene {
