@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SC Calculator mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #000; --card: #1c1c1e; --card2: #2c2c2e; --fill: rgba(118,118,128,.24); --fill2: rgba(120,120,128,.32);
+    --sep: rgba(84,84,88,.6); --label: #fff; --label2: rgba(235,235,245,.6); --label3: rgba(235,235,245,.3);
+    --indigo: #5e5ce6; --blue: #0a84ff; --teal: #40c8e0; --green: #30d158; --orange: #ff9f0a; --yellow: #ffd60a;
+    --pink: #ff375f; --red: #ff453a; --purple: #bf5af2; --gray: #8e8e93;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100vh; background: #f2f2f7; color: #1c1c1e; font-family: Inter, -apple-system, "Segoe UI", sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 56px; padding: 20px; flex-wrap: wrap;
+    -webkit-font-smoothing: antialiased; letter-spacing: -.01em;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .phone { width: 393px; height: 852px; border-radius: 62px; padding: 11px; background: #0b0b0c; box-shadow: 0 0 0 1.5px #c9c9ce, 0 30px 60px rgba(0,0,0,.25); position: relative; flex: none; }
+  .wrap { position: relative; width: 100%; height: 100%; border-radius: 51px; overflow: hidden; background: #000; color: var(--label); }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 122px; height: 35px; border-radius: 20px; background: #000; z-index: 50; }
+  .status { position: absolute; top: 0; left: 0; right: 0; height: 52px; display: flex; justify-content: space-between; align-items: center; padding: 4px 32px 0 46px; font-weight: 600; font-size: 16px; z-index: 40; pointer-events: none; }
+  .status .r { display: flex; gap: 6px; font-size: 16px; }
+  .homebar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: #fff; z-index: 90; cursor: pointer; }
+
+  .screen { position: absolute; inset: 0; display: none; }
+  .screen.on { display: block; animation: fade .25s ease-out; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .scroll { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Home screen */
+  .home { background: radial-gradient(120% 80% at 20% 0%, #3a3f8f 0%, #1a1d44 45%, #07070f 100%); }
+  .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 0; padding: 72px 20px 0; }
+  .app { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; }
+  .app .ic { width: 62px; height: 62px; border-radius: 14px; display: grid; place-items: center; font-size: 32px; overflow: hidden; }
+  .app .ic img { width: 100%; height: 100%; }
+  .dock { position: absolute; left: 12px; right: 12px; bottom: 20px; height: 90px; border-radius: 32px; display: flex; justify-content: space-around; align-items: center; background: rgba(255,255,255,.14); backdrop-filter: blur(30px); }
+
+  /* Calculator */
+  .calc { padding: 54px 16px 22px; }
+  .calc.on { display: flex; flex-direction: column; }
+  .ctop { display: flex; align-items: center; justify-content: space-between; height: 40px; }
+  .circle-btn { width: 40px; height: 40px; border-radius: 20px; background: var(--fill2); display: grid; place-items: center; font-size: 20px; }
+  .ind { display: flex; gap: 6px; }
+  .ind span { font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 10px; background: var(--fill); color: rgba(255,255,255,.85); }
+  .ind span.off { color: rgba(255,255,255,.25); }
+  .disp { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; padding: 0 6px 18px; gap: 6px; min-height: 0; overflow: hidden; touch-action: pan-y; }
+  .expr { font-size: 30px; font-weight: 400; text-align: right; word-break: break-all; line-height: 1.15; max-height: 70px; overflow: hidden; }
+  .expr.done { color: var(--label2); }
+  .res { font-weight: 300; white-space: nowrap; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .res.big { font-size: 64px; } .res.prev { font-size: 40px; color: var(--label2); }
+  .keys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+  .k { border-radius: 15px; display: grid; place-items: center; transition: opacity .25s; user-select: none; }
+  .k:active { opacity: .55; transition: none; }
+  .k.fn { height: 40px; background: #1c1c1e; color: rgba(255,255,255,.88); font-size: 15px; font-weight: 500; }
+  .k.num { height: 60px; background: #333336; font-size: 26px; font-weight: 400; }
+  .k.op { height: 60px; background: rgba(94,92,230,.3); color: #b8b5ff; font-size: 26px; font-weight: 500; }
+  .k.del { height: 60px; background: #333336; color: #ff8c80; font-size: 19px; font-weight: 600; }
+  .k.eq { height: 60px; background: var(--indigo); font-size: 30px; font-weight: 500; }
+  .k.tog { background: var(--indigo); color: #fff; }
+  .k .alt { color: #8f8cff; }
+  .gap { grid-column: 1 / -1; height: 4px; }
+
+  /* Navigation + grouped UI */
+  .navbar { position: sticky; top: 0; z-index: 5; padding: 52px 16px 0; background: rgba(0,0,0,.82); backdrop-filter: blur(20px); }
+  .navrow { display: flex; justify-content: space-between; align-items: center; height: 44px; }
+  .navbtns { display: flex; gap: 8px; }
+  .nb { width: 40px; height: 40px; border-radius: 20px; background: var(--fill); display: grid; place-items: center; font-size: 21px; color: #fff; }
+  .large { font-size: 34px; font-weight: 700; letter-spacing: -.02em; padding: 2px 4px 8px; }
+  .search { display: flex; align-items: center; gap: 6px; height: 36px; border-radius: 10px; background: var(--fill); color: var(--label2); padding: 0 8px; font-size: 16px; margin-bottom: 10px; }
+  .body { padding: 6px 16px 60px; display: flex; flex-direction: column; gap: 22px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .chip { flex: none; height: 34px; padding: 0 14px; border-radius: 17px; background: var(--fill2); font-size: 15px; font-weight: 500; }
+  .chip.sel { background: var(--indigo); }
+  .chip.add { width: 34px; padding: 0; color: var(--label2); }
+  .sh { display: flex; justify-content: space-between; font-size: 13px; text-transform: uppercase; color: var(--label2); padding: 0 16px 7px; }
+  .card { background: var(--card); border-radius: 22px; overflow: hidden; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 8px; padding: 18px 8px; }
+  .tile { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; }
+  .tile:active { opacity: .6; }
+  .ai { width: 60px; height: 60px; border-radius: 13.5px; display: grid; place-items: center; color: #fff; font-size: 30px; }
+  .ai.addi { background: var(--fill); color: var(--label2); font-size: 26px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; width: 100%; text-align: left; position: relative; }
+  .row:active { background: #3a3a3c; }
+  .row + .row::before { content: ""; position: absolute; top: 0; left: 57px; right: 0; border-top: .5px solid var(--sep); }
+  .si { width: 29px; height: 29px; border-radius: 6.5px; display: grid; place-items: center; color: #fff; font-size: 17px; flex: none; }
+  .rt { flex: 1; font-size: 17px; }
+  .rt small { display: block; font-size: 13px; color: var(--label2); }
+  .chev { color: var(--label3); font-size: 16px; }
+  .val { color: var(--label2); font-size: 17px; }
+  .foot { font-size: 13px; color: var(--label2); padding: 7px 16px 0; line-height: 1.35; }
+
+  /* Sheets */
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 70; display: none; }
+  .dim.on { display: block; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #1c1c1e; border-radius: 38px 38px 0 0; overflow: hidden; animation: up .38s cubic-bezier(.2,.9,.25,1); }
+  .sheet.grouped { background: #000; }
+  .sheet.full { height: 93%; } .sheet.half { height: 52%; }
+  @keyframes up { from { transform: translateY(100%); } to { transform: none; } }
+  .grabber { width: 36px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.3); margin: 6px auto 0; }
+  .shead { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px 6px; height: 54px; }
+  .shead .title { font-weight: 600; font-size: 17px; position: absolute; left: 50%; transform: translateX(-50%); }
+  .sbtn { height: 36px; padding: 0 14px; border-radius: 18px; background: var(--fill); font-size: 16px; font-weight: 500; }
+  .sbtn.primary { background: var(--indigo); font-weight: 600; }
+  .sbody { position: absolute; inset: 70px 0 0 0; overflow-y: auto; padding: 4px 16px 50px; scrollbar-width: none; }
+  .sec { margin-top: 22px; } .sec:first-child { margin-top: 6px; }
+  .toggle { width: 51px; height: 31px; border-radius: 16px; background: var(--indigo); position: relative; flex: none; }
+  .toggle::after { content: ""; position: absolute; right: 2px; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; }
+  .icons { display: flex; justify-content: space-around; padding: 14px 4px; }
+  .icons button { display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 12px; }
+  .icons img { width: 58px; height: 58px; border-radius: 13px; box-shadow: 0 0 0 .5px rgba(255,255,255,.12); }
+  .icons i { font-size: 22px; color: var(--label3); } .icons .cur i { color: var(--indigo); }
+  .seg { display: flex; background: var(--fill); border-radius: 9px; padding: 2px; }
+  .seg span { flex: 1; text-align: center; padding: 6px; font-size: 13px; font-weight: 500; border-radius: 7px; }
+  .seg span.on { background: #636366; }
+  .step { display: flex; gap: 12px; padding: 11px 16px; font-size: 16px; line-height: 1.35; position: relative; }
+  .step + .step::before { content: ""; position: absolute; top: 0; left: 44px; right: 0; border-top: .5px solid var(--sep); }
+  .step b { font-weight: 600; } .step .n { color: var(--label2); font-weight: 600; width: 16px; flex: none; font-variant-numeric: tabular-nums; }
+  .gh { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; padding: 0 4px 8px; }
+  .hist { padding: 12px 16px; text-align: right; position: relative; width: 100%; }
+  .hist + .hist::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: .5px solid var(--sep); }
+  .hist small { display: block; color: var(--label2); font-size: 15px; } .hist span { font-size: 22px; font-variant-numeric: tabular-nums; }
+
+  /* Onboarding + passcode */
+  .onb { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 52px 0 34px; }
+  .onb .main { flex: 1; overflow-y: auto; padding: 44px 36px 0; scrollbar-width: none; }
+  .onb h1 { font-size: 34px; font-weight: 700; text-align: center; letter-spacing: -.02em; line-height: 1.15; margin-bottom: 36px; }
+  .feat { display: flex; gap: 16px; margin-bottom: 28px; }
+  .feat i { font-size: 32px; color: var(--indigo); width: 44px; flex: none; text-align: center; }
+  .feat b { display: block; font-weight: 600; font-size: 17px; margin-bottom: 2px; }
+  .feat span { color: var(--label2); font-size: 15px; line-height: 1.35; }
+  .cta { margin: 0 24px; height: 52px; border-radius: 26px; background: var(--indigo); font-weight: 600; font-size: 17px; }
+  .cta.disabled { opacity: .35; }
+  .pc { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: 96px 0 34px; }
+  .pc h2 { font-size: 20px; font-weight: 600; }
+  .pc p { color: var(--label2); font-size: 15px; margin-top: 8px; text-align: center; padding: 0 30px; }
+  .dots { display: flex; gap: 18px; margin-top: 28px; height: 14px; }
+  .dots span { width: 13px; height: 13px; border-radius: 50%; border: 1.2px solid #fff; }
+  .dots span.f { background: #fff; }
+  .pad { display: grid; grid-template-columns: repeat(3, 78px); gap: 16px 26px; margin: auto 0; }
+  .pad button { height: 78px; border-radius: 39px; font-size: 34px; font-weight: 400; background: var(--fill2); }
+  .pad button:active { background: #6c6c70; }
+  .pad .txt { background: none; font-size: 17px; }
+  .pc .cta { align-self: stretch; }
+
+  .faceid { position: absolute; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; }
+  .faceid.on { display: flex; }
+  .faceid .box { width: 156px; height: 156px; border-radius: 30px; background: rgba(44,44,46,.92); backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font-size: 15px; font-weight: 500; }
+  .faceid .box i { font-size: 60px; }
+  .toast { position: absolute; top: 58px; left: 50%; transform: translateX(-50%); z-index: 95; padding: 12px 18px; border-radius: 24px; font-size: 14px; font-weight: 500; white-space: nowrap; display: none; background: rgba(44,44,46,.95); backdrop-filter: blur(20px); }
+  .toast.on { display: block; animation: fade .2s; }
+
+  .panel { width: 300px; display: flex; flex-direction: column; gap: 14px; }
+  .panel h2 { font-size: 28px; font-weight: 700; letter-spacing: -.02em; }
+  .panel p { color: #6e6e73; font-size: 14px; line-height: 1.5; }
+  .panel .list { background: #fff; border-radius: 14px; overflow: hidden; }
+  .panel .list button { width: 100%; text-align: left; padding: 12px 16px; font-size: 15px; display: flex; gap: 12px; align-items: center; border-bottom: .5px solid #e5e5ea; }
+  .panel .list button:last-child { border-bottom: 0; }
+  .panel .list button:hover { background: #f5f5f7; }
+  .panel .list i { color: var(--indigo); font-size: 18px; }
+  .panel code { background: #fff; padding: 2px 7px; border-radius: 6px; font-weight: 600; color: var(--indigo); }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="wrap" id="wrap">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="r"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-4"></i></span></div>
+
+    <section class="screen home on" id="s-home"><div class="apps" id="apps"></div><div class="dock" id="dock"></div></section>
+
+    <section class="screen" id="s-setup"><div id="setup"></div></section>
+
+    <section class="screen calc" id="s-calc">
+      <div class="ctop">
+        <button class="circle-btn" onclick="openSheet('history')" aria-label="History"><i class="ti ti-history"></i></button>
+        <div class="ind"><span id="i-angle">DEG</span><span id="i-2nd" class="off">2nd</span></div>
+        <span style="width:40px"></span>
+      </div>
+      <div class="disp" id="disp"><div class="expr" id="expr"></div><div class="res big" id="res">0</div></div>
+      <div class="keys" id="keys"></div>
+    </section>
+
+    <section class="screen" id="s-vault">
+      <div class="scroll">
+        <div class="navbar">
+          <div class="navrow">
+            <button class="nb" onclick="lock()" aria-label="Lock"><i class="ti ti-lock"></i></button>
+            <div class="navbtns">
+              <button class="nb" onclick="openSheet('add')" aria-label="Add App"><i class="ti ti-plus"></i></button>
+              <button class="nb" onclick="openSheet('settings')" aria-label="Settings"><i class="ti ti-settings"></i></button>
+            </div>
+          </div>
+          <div class="large">Apps</div>
+          <div class="search"><i class="ti ti-search"></i>Search</div>
+        </div>
+        <div class="body">
+          <div class="chips" id="chips"></div>
+          <div><div class="sh"><span id="sec-title">All Apps</span><span id="sec-count"></span></div><div class="card"><div class="grid" id="grid"></div></div></div>
+          <div><div class="sh"><span>Hiding</span></div>
+            <div class="card">
+              <button class="row" onclick="openSheet('guide')"><span class="si" style="background:var(--teal)"><i class="ti ti-eye-off"></i></span><span class="rt">Hide Guide<small>Hide apps from your Home Screen</small></span><i class="ti ti-chevron-right chev"></i></button>
+              <button class="row" onclick="openSheet('add')"><span class="si" style="background:var(--indigo)"><i class="ti ti-plus"></i></span><span class="rt">Add App<small>From popular apps or a Shortcut</small></span><i class="ti ti-chevron-right chev"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="dim" id="dim" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
+    <div class="faceid" id="faceid"><div class="box"><i class="ti ti-face-id" id="fid-i"></i><span id="fid-t">Face ID</span></div></div>
+    <div class="toast" id="toast"></div>
+    <div class="homebar" onclick="show('home')"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>SC Calculator</h2>
+  <p>A clickable preview of the iPhone app. Tap the SC Calculator icon on the Home Screen, or jump to a screen below.</p>
+  <p>Secret code <code>2580</code> then <code>=</code>&nbsp; · &nbsp;Decoy <code>1111</code> then <code>=</code></p>
+  <div class="list">
+    <button onclick="show('home')"><i class="ti ti-device-mobile"></i>Home Screen</button>
+    <button onclick="show('setup')"><i class="ti ti-sparkles"></i>First launch</button>
+    <button onclick="show('calc')"><i class="ti ti-math-function"></i>Scientific calculator</button>
+    <button onclick="unlock('real',true)"><i class="ti ti-layout-grid"></i>Apps (your space)</button>
+    <button onclick="unlock('decoy',true)"><i class="ti ti-masks-theater"></i>Decoy space</button>
+    <button onclick="unlock('real',true);openSheet('add')"><i class="ti ti-plus"></i>New app</button>
+    <button onclick="unlock('real',true);openSheet('settings')"><i class="ti ti-settings"></i>Settings</button>
+    <button onclick="unlock('real',true);openSheet('guide')"><i class="ti ti-eye-off"></i>Hide Guide</button>
+  </div>
+  <p>On a real iPhone the bars, buttons and sheets use Apple's own Liquid Glass and San Francisco font, so it will look even more native.</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ICON = k => `../Numo/Assets.xcassets/Preview-${k}.imageset/icon.png`;
+let currentIcon = "Calculator";
+const TINTS = ["var(--indigo)","var(--blue)","var(--teal)","var(--green)","var(--orange)","var(--yellow)","var(--pink)","var(--red)","var(--purple)","var(--gray)"];
+const vaults = {
+  real: { groups: ["Social","Messages","Money"], items: [
+    ["WhatsApp","phone",3,"Messages"],["Instagram","camera",6,"Social"],["Telegram","send",1,"Messages"],["Snapchat","ghost-2",5,"Social"],
+    ["Tinder","heart",6,"Social"],["PayPal","currency-dollar",1,"Money"],["Bank","building-bank",3,"Money"],["Signal","message-circle",1,"Messages"],
+    ["X","bolt",9,"Social"],["Reddit","world",4,"Social"],["Discord","device-gamepad-2",0,"Messages"] ] },
+  decoy: { groups: ["Work","Fitness"], items: [["Outlook","mail",1,"Work"],["Teams","users",0,"Work"],["Strava","run",4,"Fitness"]] }
+};
+let profile = "real", group = null;
+
+function show(name) {
+  closeSheet();
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  $("s-" + name).classList.add("on");
+  if (name === "home") renderHome();
+  if (name === "calc") { clearAll(); }
+  if (name === "setup") onboarding(0);
+}
+function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t.h); t.h = setTimeout(() => t.classList.remove("on"), 1800); }
+
+/* Home */
+const FAKE = [["Photos","photo","#fff","#ff375f"],["Mail","mail","#0a84ff","#fff"],["Clock","clock","#1c1c1e","#fff"],["Maps","map-2","#30d158","#fff"],
+  ["Music","music","#ff375f","#fff"],["Camera","camera","#8e8e93","#fff"],["Wallet","wallet","#1c1c1e","#ffd60a"],["Settings","settings","#8e8e93","#fff"],
+  ["Podcasts","microphone-2","#bf5af2","#fff"],["Books","book","#ff9f0a","#fff"],["Files","folder","#0a84ff","#fff"]];
+function renderHome() {
+  const a = FAKE.map(([n,i,bg,fg]) => `<div class="app"><div class="ic" style="background:${bg};color:${fg}"><i class="ti ti-${i}"></i></div>${n}</div>`);
+  a.splice(5, 0, `<button class="app" onclick="openNumo()"><div class="ic"><img src="${ICON(currentIcon)}" alt=""></div>SC Calculator</button>`);
+  $("apps").innerHTML = a.join("");
+  $("dock").innerHTML = [["phone","#30d158"],["compass","#0a84ff"],["message","#30d158"],["music","#ff375f"]].map(([i,c]) => `<div class="app"><div class="ic" style="background:${c}"><i class="ti ti-${i}"></i></div></div>`).join("");
+}
+let setupDone = false;
+function openNumo() { show(setupDone ? "calc" : "setup"); }
+
+/* Onboarding */
+const PAGES = [
+  { title: "Welcome to SC Calculator", btn: "Continue", rows: [["math-function","A Real Calculator","SC Calculator is a full scientific calculator. That's all anyone else will see."],["lock","Your Private Space","Type your secret code and press = to open the apps you've hidden."],["face-id","Protected by Face ID","Your code is never stored, and Face ID is required to get in."],["eye-off","Hide Apps","Step-by-step help to hide apps from your Home Screen."]] },
+  { pin: true },
+  { title: "Add a Decoy Code?", btn: "Set Decoy Code", second: "Not Now", rows: [["masks-theater","A Second Space","A decoy code opens a separate space that looks real but holds only ordinary apps."],["hand-stop","For Pressure Moments","If someone asks you to open SC Calculator, use the decoy code instead."]] },
+  { title: "You're All Set", btn: "Open Calculator", rows: [["circle-number-1","Opens as a Calculator","From now on, SC Calculator starts as a scientific calculator."],["circle-number-2","Type Your Code, Press =","Then confirm with Face ID to open your space."],["circle-number-3","Hide Your Apps","Open Hide Guide inside your space to finish setting up."]] }
+];
+let pin = "";
+function onboarding(i) {
+  const p = PAGES[i];
+  if (p.pin) {
+    pin = "";
+    $("setup").innerHTML = `<div class="pc"><h2>Choose a Secret Code</h2><p>4–8 digits. You'll type it on the calculator, then press =.</p><div class="dots" id="dots"></div>
+      <div class="pad">${["1","2","3","4","5","6","7","8","9","","0","del"].map(k => k === "" ? "<span></span>" : k === "del" ? `<button class="txt" onclick="pk('del')">Delete</button>` : `<button onclick="pk('${k}')">${k}</button>`).join("")}</div>
+      <button class="cta disabled" id="pin-go" onclick="if(pin.length>=4)onboarding(2)">Continue</button></div>`;
+    renderDots(); return;
+  }
+  $("setup").innerHTML = `<div class="onb"><div class="main"><h1>${p.title}</h1>${p.rows.map(([ic,t,s]) => `<div class="feat"><i class="ti ti-${ic}"></i><div><b>${t}</b><span>${s}</span></div></div>`).join("")}</div>
+    <button class="cta" onclick="${i === 3 ? "setupDone=true;show('calc')" : `onboarding(${i === 2 ? 3 : i + 1})`}">${p.btn}</button>
+    ${p.second ? `<button style="margin-top:14px;color:#8f8cff;font-size:17px" onclick="onboarding(3)">${p.second}</button>` : ""}</div>`;
+}
+function pk(k) { if (k === "del") pin = pin.slice(0, -1); else if (pin.length < 8) pin += k; renderDots(); }
+function renderDots() {
+  const n = Math.max(4, Math.min(8, pin.length + 1));
+  $("dots").innerHTML = Array.from({ length: n }, (_, i) => `<span class="${i < pin.length ? "f" : ""}"></span>`).join("");
+  $("pin-go").classList.toggle("disabled", pin.length < 4);
+}
+
+/* Scientific calculator: same rules as the Swift engine */
+const FN_ROWS = [
+  [["2nd","second"],["Deg","angle"],["sin","trig:sin:sin⁻¹"],["cos","trig:cos:cos⁻¹"],["tan","trig:tan:tan⁻¹"]],
+  [["x²","sq"],["xʸ","pow"],["√x","root"],["ln","ln"],["log","log"]],
+  [["(","open"],[")","close"],["%","pct"],["x!","fact"],["π","pi"]]];
+const MAIN_ROWS = [
+  [["7","d"],["8","d"],["9","d"],["⌫","bs"],["AC","ac"]],
+  [["4","d"],["5","d"],["6","d"],["×","op"],["÷","op"]],
+  [["1","d"],["2","d"],["3","d"],["+","op"],["−","op"]],
+  [["0","d"],[".","d"],["EE","ee"],["Ans","ans"],["=","eq"]]];
+const ALT = { sq: "x³", pow: "ʸ√x", root: "∛x", ln: "eˣ", log: "10ˣ", fact: "1/x", pi: "e" };
+let tokens = [], showing = false, ans = 0, angle = "DEG", second = false, resultText = "0", history = [];
+
+function buildKeys() {
+  const cell = ([l, a], i, fn) => {
+    let cls = fn ? "fn" : a === "d" || a === "ee" || a === "ans" ? "num" : a === "op" ? "op" : a === "eq" ? "eq" : "del";
+    let label = l;
+    if (a === "angle") label = angle === "DEG" ? "Deg" : "Rad";
+    if (a === "second" && second) cls += " tog";
+    if (second && (ALT[a] || a.startsWith("trig"))) label = `<span class="alt">${ALT[a] || a.split(":")[2]}</span>`;
+    if (a === "bs") label = '<i class="ti ti-backspace" style="font-size:24px"></i>';
+    return `<button class="k ${cls}" onclick="press('${a}','${l}')">${label}</button>`;
+  };
+  $("keys").innerHTML = FN_ROWS.flat().map((k, i) => cell(k, i, true)).join("") + '<div class="gap"></div>' + MAIN_ROWS.flat().map((k, i) => cell(k, i, false)).join("");
+  $("i-angle").textContent = angle; $("i-2nd").classList.toggle("off", !second);
+}
+function input(t) {
+  if (showing) { showing = false; tokens = (t.k === "b" || t.k === "p") ? [{ k: "k", v: "Ans" }] : []; }
+  if (tokens.length < 80) tokens.push(t);
+  second = false;
+}
+function press(a, l) {
+  const s = second;
+  if (a === "second") second = !second;
+  else if (a === "angle") angle = angle === "DEG" ? "RAD" : "DEG";
+  else if (a.startsWith("trig")) { const [, n, inv] = a.split(":"); input({ k: "f", v: s ? inv : n }); }
+  else if (a === "sq") input({ k: "p", v: s ? "³" : "²" });
+  else if (a === "pow") input({ k: "b", v: s ? "ˣ√" : "^" });
+  else if (a === "root") input({ k: "f", v: s ? "∛" : "√" });
+  else if (a === "ln") input({ k: "f", v: s ? "e^" : "ln" });
+  else if (a === "log") input({ k: "f", v: s ? "10^" : "log" });
+  else if (a === "open") input({ k: "o" });
+  else if (a === "close") input({ k: "c" });
+  else if (a === "pct") input({ k: "p", v: "%" });
+  else if (a === "fact") input({ k: "p", v: s ? "⁻¹" : "!" });
+  else if (a === "pi") input({ k: "k", v: s ? "e" : "π" });
+  else if (a === "d") input({ k: "d", v: l });
+  else if (a === "op") input({ k: "b", v: l });
+  else if (a === "ee") input({ k: "b", v: "E" });
+  else if (a === "ans") input({ k: "k", v: "Ans" });
+  else if (a === "bs") { if (showing) showing = false; else tokens.pop(); }
+  else if (a === "ac") clearAll();
+  else if (a === "eq") return equals();
+  render();
+}
+function clearAll() { tokens = []; showing = false; second = false; resultText = "0"; render(); }
+const text = t => t.k === "d" ? t.v : t.k === "b" ? ("+−×÷".includes(t.v) ? ` ${t.v} ` : t.v) : t.k === "f" ? t.v + "(" : t.k === "o" ? "(" : t.k === "c" ? ")" : t.v;
+const exprText = () => tokens.map(text).join("").trim();
+
+function evaluate(toks) {
+  const lx = []; let buf = "";
+  const flush = () => { if (!buf) return; if ((buf.match(/\./g) || []).length > 1) throw "syntax"; let s = buf; if (s[0] === ".") s = "0" + s; if (s.endsWith(".")) s += "0"; lx.push({ k: "n", v: parseFloat(s) }); buf = ""; };
+  for (const t of toks) { if (t.k === "d") { buf += t.v; continue; } flush(); lx.push(t); }
+  flush();
+  if (!lx.length) throw "syntax";
+  let i = 0;
+  const peek = () => lx[i] || { k: "end" };
+  const isB = v => peek().k === "b" && peek().v === v;
+  const rad = angle === "DEG" ? Math.PI / 180 : 1, deg = angle === "DEG" ? 180 / Math.PI : 1;
+  const clean = v => Math.abs(v) < 1e-12 ? 0 : v;
+  function expr() { let v = term(); for (;;) { if (isB("+")) { i++; v += term(); } else if (isB("−")) { i++; v -= term(); } else return v; } }
+  function term() {
+    let v = unary();
+    for (;;) {
+      if (isB("×")) { i++; v *= unary(); }
+      else if (isB("÷")) { i++; const d = unary(); if (d === 0) throw "math"; v /= d; }
+      else if (["n", "k", "o", "f"].includes(peek().k)) v *= unary();
+      else return v;
+    }
+  }
+  function unary() { if (isB("−")) { i++; return -unary(); } if (isB("+")) { i++; return unary(); } return power(); }
+  function power() {
+    const b = post();
+    if (isB("^")) { i++; return Math.pow(b, unary()); }
+    if (isB("E")) { i++; return b * Math.pow(10, unary()); }
+    if (isB("ˣ√")) { i++; const x = unary(); if (b === 0) throw "math"; if (x < 0) { if (b % 2 !== 1 && b % 2 !== -1) throw "math"; return -Math.pow(-x, 1 / b); } return Math.pow(x, 1 / b); }
+    return b;
+  }
+  function post() {
+    let v = prim();
+    while (peek().k === "p") {
+      const p = lx[i++].v;
+      if (p === "²") v = v * v; else if (p === "³") v = v * v * v; else if (p === "%") v /= 100;
+      else if (p === "⁻¹") { if (v === 0) throw "math"; v = 1 / v; }
+      else { if (v < 0 || v > 170 || v !== Math.round(v)) throw "math"; let r = 1; for (let n = 2; n <= v; n++) r *= n; v = r; }
+    }
+    return v;
+  }
+  function close() { if (peek().k === "c") i++; else if (peek().k !== "end") throw "syntax"; }
+  function prim() {
+    const t = lx[i++] || { k: "end" };
+    if (t.k === "n") return t.v;
+    if (t.k === "k") return t.v === "π" ? Math.PI : t.v === "e" ? Math.E : ans;
+    if (t.k === "o") { const v = expr(); close(); return v; }
+    if (t.k === "f") {
+      const x = expr(); close();
+      switch (t.v) {
+        case "sin": return clean(Math.sin(x * rad)); case "cos": return clean(Math.cos(x * rad));
+        case "tan": if (angle === "DEG" && (x - 90) % 180 === 0) throw "math"; return clean(Math.tan(x * rad));
+        case "sin⁻¹": if (Math.abs(x) > 1) throw "math"; return Math.asin(x) * deg;
+        case "cos⁻¹": if (Math.abs(x) > 1) throw "math"; return Math.acos(x) * deg;
+        case "tan⁻¹": return Math.atan(x) * deg;
+        case "ln": if (x <= 0) throw "math"; return Math.log(x);
+        case "log": if (x <= 0) throw "math"; return Math.log10(x);
+        case "√": if (x < 0) throw "math"; return Math.sqrt(x);
+        case "∛": return Math.cbrt(x); case "e^": return Math.exp(x); case "10^": return Math.pow(10, x);
+      }
+    }
+    throw "syntax";
+  }
+  const v = expr();
+  if (peek().k !== "end") throw "syntax";
+  if (!isFinite(v)) throw "math";
+  return v;
+}
+function fmt(v) {
+  if (v === 0) return "0";
+  const a = Math.abs(v);
+  if (a >= 1e12 || a < 1e-4) { let [m, e] = v.toExponential(6).split("e"); m = m.replace(/\.?0+$/, ""); return m + "e" + parseInt(e, 10); }
+  const s = String(Number(v.toPrecision(12)));
+  const neg = s.startsWith("-"); const [ip, fp] = (neg ? s.slice(1) : s).split(".");
+  return (neg ? "-" : "") + ip.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (fp ? "." + fp : "");
+}
+function preview() {
+  if (showing || !tokens.some(t => t.k !== "d")) return null;
+  try { return fmt(evaluate(tokens)); } catch { return null; }
+}
+function equals() {
+  if (!tokens.length || showing) return;
+  const plain = tokens.every(t => t.k === "d" && t.v !== ".");
+  const code = plain && tokens.length >= 4 && tokens.length <= 8 ? tokens.map(t => t.v).join("") : null;
+  try {
+    const v = evaluate(tokens); ans = v; resultText = fmt(v);
+    if (!plain) history.unshift([exprText(), resultText]);
+  } catch (e) { resultText = e === "math" ? "Math Error" : "Syntax Error"; }
+  showing = true; second = false; render();
+  if (code === "2580") unlock("real"); else if (code === "1111") unlock("decoy");
+}
+function render() {
+  const e = exprText();
+  $("expr").textContent = e || " "; $("expr").classList.toggle("done", showing);
+  const r = $("res");
+  if (showing || !tokens.length) { r.className = "res big"; r.textContent = resultText; }
+  else { r.className = "res prev"; r.textContent = preview() || " "; }
+  const len = r.textContent.length, base = r.classList.contains("big") ? 64 : 40;
+  r.style.fontSize = len > 9 ? Math.max(26, base * 9 / len) + "px" : "";
+  buildKeys();
+}
+(() => { let x0 = null; const d = $("disp");
+  d.addEventListener("pointerdown", e => x0 = e.clientX);
+  d.addEventListener("pointerup", e => { if (x0 !== null && Math.abs(e.clientX - x0) > 40) press("bs"); x0 = null; }); })();
+
+/* Unlock */
+function unlock(p, instant) {
+  profile = p; group = null;
+  if (instant) { show("vault"); renderVault(); return; }
+  const f = $("faceid"); f.classList.add("on"); $("fid-i").className = "ti ti-face-id"; $("fid-t").textContent = "Face ID";
+  setTimeout(() => { $("fid-i").className = "ti ti-circle-check"; $("fid-t").textContent = ""; }, 650);
+  setTimeout(() => { f.classList.remove("on"); show("vault"); renderVault(); }, 1100);
+}
+function lock() { show("calc"); }
+
+/* Vault */
+function renderVault() {
+  const v = vaults[profile];
+  $("chips").innerHTML = [null, ...v.groups].map(g => `<button class="chip ${group === g ? "sel" : ""}" onclick='group=${JSON.stringify(g)};renderVault()'>${g || "All"}</button>`).join("")
+    + `<button class="chip add" onclick="toast('New Group')" aria-label="New Group"><i class="ti ti-plus"></i></button>`;
+  const items = v.items.filter(it => !group || it[3] === group);
+  $("sec-title").textContent = group || "All Apps"; $("sec-count").textContent = items.length;
+  $("grid").innerHTML = items.map(([n, i, t]) => `<button class="tile" onclick="toast('Opening ${n} — iOS asks for Face ID')"><span class="ai" style="background:${TINTS[t]}"><i class="ti ti-${i}"></i></span>${n}</button>`).join("")
+    + `<button class="tile" onclick="openSheet('add')"><span class="ai addi"><i class="ti ti-plus"></i></span><span style="color:var(--label2)">Add</span></button>`;
+}
+
+/* Sheets */
+function head(title, left, right) {
+  return `<div class="grabber"></div><div class="shead">${left ? `<button class="sbtn" onclick="closeSheet()">${left}</button>` : "<span></span>"}<span class="title">${title}</span>${right ? `<button class="sbtn primary" onclick="closeSheet()">${right}</button>` : "<span></span>"}</div>`;
+}
+function openSheet(kind) {
+  const s = $("sheet"); let h = "", cls = "full grouped";
+  if (kind === "settings") {
+    const v = vaults[profile];
+    h = head("Settings", "", "Done") + `<div class="sbody">
+      <div class="sec"><div class="sh">App Icon</div><div class="card icons">${["Calculator","Notes","Weather","Compass"].map(k =>
+        `<button class="${k === currentIcon ? "cur" : ""}" onclick="setIcon('${k}')"><img src="${ICON(k)}" alt="">${k}<i class="ti ti-${k === currentIcon ? "circle-check-filled" : "circle"}"></i></button>`).join("")}</div>
+        <div class="foot">iOS shows a short notice when the icon changes. The name under the icon stays "SC Calculator".</div></div>
+      <div class="sec"><div class="sh">Security</div><div class="card">
+        <div class="row"><span class="si" style="background:var(--green)"><i class="ti ti-face-id"></i></span><span class="rt">Require Face ID</span><span class="toggle"></span></div>
+        <button class="row"><span class="si" style="background:var(--gray)"><i class="ti ti-lock"></i></span><span class="rt">Change Secret Code</span><i class="ti ti-chevron-right chev"></i></button>
+        ${profile === "real" ? '<button class="row"><span class="si" style="background:var(--orange)"><i class="ti ti-masks-theater"></i></span><span class="rt">Decoy Code</span><span class="val">On</span><i class="ti ti-chevron-right chev"></i></button>' : ""}
+      </div></div>
+      <div class="sec"><div class="sh">Groups</div><div class="card">${v.groups.map(g => `<div class="row"><span class="rt">${g}</span><span class="val">${v.items.filter(i => i[3] === g).length}</span></div>`).join("")}
+        <div class="row"><span class="rt" style="color:var(--label3)">Add Group</span></div></div>
+        <div class="foot">Swipe left to delete a group. Its apps stay, without a group.</div></div>
+      ${profile === "real" ? '<div class="sec"><div class="card"><button class="row"><span class="rt" style="color:var(--red)">Erase Everything</span></button></div><div class="foot">SC Calculator 1.0</div></div>' : ""}
+    </div>`;
+  } else if (kind === "add") {
+    h = head("New App", "Cancel", "Done") + `<div class="sbody">
+      <div class="sec"><div class="card" style="padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:16px">
+        <span class="ai" style="width:88px;height:88px;border-radius:20px;font-size:44px;background:var(--green)"><i class="ti ti-phone"></i></span>
+        <div style="width:100%;background:var(--fill);border-radius:12px;padding:12px;text-align:center;font-size:20px;font-weight:600">WhatsApp</div></div></div>
+      <div class="sec"><div class="card"><button class="row"><span class="si" style="background:var(--blue)"><i class="ti ti-layout-grid"></i></span><span class="rt">Choose a Popular App</span><i class="ti ti-chevron-right chev"></i></button></div></div>
+      <div class="sec"><div class="sh">Opens With</div><div class="seg" style="margin-bottom:8px"><span class="on">App Link</span><span>Shortcut</span></div>
+        <div class="card"><div class="row"><span class="rt" style="font-family:ui-monospace,Consolas,monospace;font-size:16px">whatsapp://</span></div></div>
+        <div class="foot">The link that opens the app. Popular apps fill this in for you.</div></div>
+      <div class="sec"><div class="sh">Group</div><div class="card"><div class="row"><span class="rt">Group</span><span class="val">Messages <i class="ti ti-selector"></i></span></div></div></div>
+      <div class="sec"><div class="card" style="padding:14px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;justify-items:center">${TINTS.map((t, i) =>
+        `<span style="width:40px;height:40px;border-radius:50%;background:${t};${i === 3 ? "box-shadow:0 0 0 3px #1c1c1e,0 0 0 6px rgba(235,235,245,.5)" : ""}"></span>`).join("")}</div></div>
+    </div>`;
+  } else if (kind === "guide") {
+    const g = (icon, c, title, steps, note) => `<div class="sec"><div class="gh"><span class="si" style="background:${c}"><i class="ti ti-${icon}"></i></span>${title}</div>
+      <div class="card">${steps.map((st, i) => `<div class="step"><span class="n">${i + 1}</span><span>${st}</span></div>`).join("")}</div>${note ? `<div class="foot">${note}</div>` : ""}</div>`;
+    h = head("Hide Guide", "", "Done") + `<div class="sbody">
+      <div class="sec"><div class="card" style="display:flex;gap:14px;align-items:center;padding:14px 16px"><span class="ai" style="width:48px;height:48px;border-radius:11px;font-size:26px;background:var(--teal)"><i class="ti ti-eye-off"></i></span><span style="font-size:15px;line-height:1.35">iOS hides the apps. SC Calculator is your disguised, locked way back to them.</span></div></div>
+      ${g("eye-off", "var(--indigo)", "Hide an App", ["On the Home Screen, touch and hold the app's icon.", "Tap <b>Require Face ID</b>.", "Tap <b>Hide and Require Face ID</b>, then <b>Hide App</b>."], "The app disappears from the Home Screen and search, and its notifications are hidden. It stays in a locked Hidden folder at the bottom of the App Library.")}
+      ${g("plus", "var(--blue)", "Add It to SC Calculator", ["In Apps, tap <b>+</b>.", "Choose it from <b>Popular Apps</b>, or enter its link.", "Tap the app any time to open it."], null)}
+      ${g("stack-2", "var(--pink)", "Apps Without a Link", ["In <b>Shortcuts</b>, create a shortcut with one <b>Open App</b> action.", "In SC Calculator, add an app, choose <b>Shortcut</b>, and enter its name."], "Works with any app.")}
+      ${g("moon", "var(--purple)", "Hide on a Schedule", ["Move private apps onto their own Home Screen page.", "Go to <b>Settings › Focus</b>, tap <b>+</b>, then <b>Custom</b>.", "Under <b>Customize Screens</b>, leave the private page out.", "Tap <b>Add Schedule › Time</b>."], "While that Focus is on, the private page is hidden.")}
+    </div>`;
+  } else if (kind === "history") {
+    cls = "half";
+    h = head("History", "Clear", "Done") + `<div class="sbody">${history.length ? `<div class="card">${history.map(([e, r]) => `<button class="hist" onclick="closeSheet()"><small>${e}</small><span>${r}</span></button>`).join("")}</div>`
+      : `<div style="text-align:center;padding-top:50px;color:var(--label2)"><i class="ti ti-clock" style="font-size:44px"></i><div style="color:#fff;font-size:20px;font-weight:700;margin:10px 0 4px">No History</div>Your calculations will appear here.</div>`}</div>`;
+  }
+  s.className = "sheet " + cls; s.innerHTML = h; $("dim").classList.add("on");
+}
+function closeSheet() { $("dim").classList.remove("on"); }
+function setIcon(k) { currentIcon = k; toast(`You have changed the icon for "SC Calculator".`); openSheet("settings"); }
+
+renderHome(); clearAll();
+function fit() { document.querySelector(".phone").style.zoom = Math.min(1, (innerHeight - 40) / 876); }
+addEventListener("resize", fit); fit();
+</script>
+</body>
+</html>
